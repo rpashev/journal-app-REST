@@ -12,7 +12,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use("/journals", journalRoutes);
-// app.use("/journals/:journalID", entryRoutes);
 app.use(entryRoutes);
 app.use("/auth", userRoutes);
 
