@@ -1,0 +1,30 @@
+const { ObjectId, ObjectID } = require("bson");
+const mongoose = require("mongoose");
+
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  termsAgreement: { type: Boolean, default: false },
+  updatesAgreement: { type: Boolean, default: false },
+  journals: [
+    {
+      journalName: { type: String, required: true },
+      description: String,
+      id: ObjectID,
+      entries: [
+        {
+          id: ObjectID,
+          title: String,
+          body: { type: String, required: true },
+          date: { type: Date },
+        },
+      ],
+    },
+  ],
+});
+
+model.exports = mongoose.model("User", userSchema);
