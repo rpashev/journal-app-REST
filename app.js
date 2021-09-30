@@ -1,10 +1,11 @@
 const express = require("express");
-
-const HttpError = require("./models/http-error");
+const mongoose = require("mongoose");
 
 const entryRoutes = require("./routes/entry-routes");
 const userRoutes = require("./routes/user-routes");
 const journalRoutes = require("./routes/journal-routes");
+
+const HttpError = require("./models/http-error");
 
 const app = express();
 
@@ -28,4 +29,11 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "Uknown error occurred!" });
 });
 
-app.listen(5000, () => console.log("listening on port 5000..."));
+mongoose
+  .connect(
+    "mongodb://rosko_kz:Rossen91kz@cluster0-shard-00-00.cpss2.mongodb.net:27017,cluster0-shard-00-01.cpss2.mongodb.net:27017,cluster0-shard-00-02.cpss2.mongodb.net:27017/journal-app?ssl=true&replicaSet=atlas-dg8hi2-shard-0&authSource=admin&retryWrites=true&w=majority"
+  )
+  .then(() => {
+    app.listen(5000, () => console.log("listening on port 5000..."));
+  })
+  .catch((err) => console.log(err));
