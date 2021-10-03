@@ -1,6 +1,9 @@
+const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
+const Journal = require("../models/journal");
+const User = require("../models/user");
 
-let journals = require("../DUMMY_DATA");
+const userID = "6159cd86b1d83b59a675123f";
 
 const getAllJournals = (req, res, next) => {
   res.json(journals);
@@ -20,7 +23,7 @@ const getJournal = (req, res, next) => {
   res.json(journal);
 };
 
-const createJournal = (req, res, next) => {
+const createJournal = async (req, res, next) => {
   const { journalName, description } = req.body;
   if (!journalName) {
     const error = new HttpError(
@@ -30,8 +33,34 @@ const createJournal = (req, res, next) => {
     return next(error);
   }
 
-  for (let journal of journals) {
-    if (journal.journalName === journalName) {
+  const createdJournal = new Journal({
+    journalName,
+    description,
+    creatorID: userID,
+    entries: [],
+  });
+
+  let user;
+  try {
+    user = await User.findById(userID).populate("journals");
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong! Please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("No such user!", 404);
+    return next(error);
+  }
+  
+  if (user.journals.length > 0) {
+    const journal = user.journals.find(
+      (journal) => journal.journalName === journalName
+    );
+    if (journal) {
       const error = new HttpError(
         "A journal with this name already exists!",
         400
@@ -40,14 +69,20 @@ const createJournal = (req, res, next) => {
     }
   }
 
-  const createdJournal = {
-    journalName,
-    description,
-    id: "journal3",
-    entries: [],
-  };
-  journals.push(createdJournal);
-  res.status = 200;
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdJournal.save({ session: sess });
+    user.journals.push(createdJournal._id);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new HttpError(
+      "Creating journal failed, please try again later!",
+      500
+    );
+    return next(error);
+  }
   res.json({ journal: createdJournal });
 };
 
