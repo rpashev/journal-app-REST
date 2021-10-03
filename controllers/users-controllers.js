@@ -12,6 +12,25 @@ const signup = async (req, res, next) => {
     updatesAgreement,
   } = req.body;
 
+  if (repeatPassword !== password || password.length < 6) {
+    const error = new HttpError(
+      "Passwords must match and be at least 6 symbols!",
+      400
+    );
+    return next(error);
+  }
+
+  let regex = /\S+@\S+\.\S+/;
+  if (regex.test(email) === false || email === "") {
+    const error = new HttpError("Invalid email!", 400);
+    return next(error);
+  }
+
+  if (!firstName || !lastName) {
+    const error = new HttpError("Please check your input and try again!", 400);
+    return next(error);
+  }
+
   let existingUser;
   try {
     existingUser = await User.findOne({ email: email });
@@ -52,7 +71,25 @@ const signup = async (req, res, next) => {
   res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
-const login = (req, res, next) => {};
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+  } catch (err) {
+    const error = new HttpError(
+      "Signing in failed! Please try again later.",
+      500
+    );
+    return next(error);
+  }
+  if (!existingUser || existingUser.password !== password) {
+    const error = new HttpError("Invalid credentials! Could not log in!", 401);
+    return next(error);
+  }
+  res.json({ message: "Logged in!" });
+};
 
 exports.usersControllers = {
   signup,
