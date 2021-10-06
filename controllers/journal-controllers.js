@@ -3,12 +3,30 @@ const HttpError = require("../models/http-error");
 const Journal = require("../models/journal");
 const User = require("../models/user");
 
-const userID = "6159cd86b1d83b59a675123f";
+const userID = "6159cd72b1d83b59a675123c";
 
-const getAllJournals = (req, res, next) => {
+const getAllJournals = async (req, res, next) => {
   //for displaying list of journals with names/description so populate needed
+  if (!mongoose.Types.ObjectId.isValid(userID)) {
+    const error = new HttpError("Invalid credentials!", 400);
+    return next(error);
+  }
+
+  let journals;
+  try {
+    journals = await Journal.find({ creator: userID }, "-entries");
+    if (journals.length === 0) {
+      const error = new HttpError("No existing journals for this user!", 404);
+      return next(error);
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, please try again later!",
+      500
+    );
+    return next(error);
+  }
   res.json(journals);
-  next();
 };
 
 const getJournal = async (req, res, next) => {
@@ -27,7 +45,7 @@ const getJournal = async (req, res, next) => {
   let data;
 
   try {
-    data = await Journal.find({ _id: journalID, creatorID: userID });
+    data = await Journal.find({ _id: journalID, creator: userID });
     if (data.length === 0) {
       const error = new HttpError(
         "Could not find a journal for the provided ID",
@@ -67,7 +85,7 @@ const createJournal = async (req, res, next) => {
   const createdJournal = new Journal({
     journalName,
     description,
-    creatorID: userID,
+    creator: userID,
     entries: [],
   });
 
@@ -117,19 +135,57 @@ const createJournal = async (req, res, next) => {
   res.json({ journal: createdJournal });
 };
 
-const deleteJournal = (req, res, next) => {
+const deleteJournal = async (req, res, next) => {
   //needs to delete from journals + user
   const journalID = req.params.journalID;
 
-  if (!journalID) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userID) ||
+    !mongoose.Types.ObjectId.isValid(journalID)
+  ) {
     const error = new HttpError(
-      "Could not find a journal for the provided ID",
-      404
+      "Invalid credentials or journal ID! Could not delete!",
+      400
     );
     return next(error);
   }
-  journals = journals.filter((journal) => journal.id !== journalID);
-  res.status = 200;
+
+  let journal;
+  try {
+    journal = await Journal.findById(journalID).populate("creator");
+
+    if (journal.creator.id !== userID) {
+      const error = new HttpError("Access denied!", 400);
+      return next(error);
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not delete journal. ",
+      500
+    );
+    return next(error);
+  }
+
+  if (!journal) {
+    const error = new HttpError("Could not find journal for this id.", 404);
+    return next(error);
+  }
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await journal.remove({ session: sess });
+    journal.creator.journals.pull(journal);
+    await journal.creator.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not delete journal.",
+      500
+    );
+    return next(error);
+  }
+
   res.json({ message: "Successfully deleted" });
 };
 

@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const journalSchema = new Schema({
   journalName: { type: String, required: true },
   description: String,
-  creatorID: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
+  creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
   entries: [
     {
       id: { type: mongoose.Types.ObjectId, required: true },
