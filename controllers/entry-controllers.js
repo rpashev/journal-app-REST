@@ -2,7 +2,7 @@ const HttpError = require("../models/http-error");
 
 const journals = require("../DUMMY_DATA");
 
-const createEntry = (req, res, next) => {
+const createEntry = async(req, res, next) => {
   const journalID = req.params.journalID;
   const journal = journals.find((journal) => journal.id === journalID);
   if (!journal) {
@@ -12,6 +12,7 @@ const createEntry = (req, res, next) => {
     );
     return next(error);
   }
+
   let { title, body } = req.body;
   const date = new Date();
   title = title ? title : date.toLocaleDateString("en-GB");

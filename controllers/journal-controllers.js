@@ -2,8 +2,9 @@ const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const Journal = require("../models/journal");
 const User = require("../models/user");
+const { getJournalService } = require("./helpers");
 
-const userID = "6159cd72b1d83b59a675123c";
+const userID = "6159cd72b1d83b59a675123f";
 
 const getAllJournals = async (req, res, next) => {
   //for displaying list of journals with names/description so populate needed
@@ -33,26 +34,9 @@ const getJournal = async (req, res, next) => {
   //for displaying all the entries, needs to check the creator of the journal
 
   const journalID = req.params.journalID;
-
-  if (
-    !mongoose.Types.ObjectId.isValid(userID) ||
-    !mongoose.Types.ObjectId.isValid(journalID)
-  ) {
-    const error = new HttpError("Invalid credentials or journal ID!", 400);
-    return next(error);
-  }
   let journal;
-  let data;
-
   try {
-    data = await Journal.find({ _id: journalID, creator: userID });
-    if (data.length === 0) {
-      const error = new HttpError(
-        "Could not find a journal for the provided ID",
-        404
-      );
-      return next(error);
-    }
+    journal = await getJournalService(userID, journalID, next);
   } catch (err) {
     const error = new HttpError(
       "Something went wrong, please try again later!",
@@ -60,7 +44,6 @@ const getJournal = async (req, res, next) => {
     );
     return next(error);
   }
-  journal = data[0];
   res.json(journal);
 };
 
