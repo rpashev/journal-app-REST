@@ -37,7 +37,7 @@ const getJournal = async (req, res, next) => {
   let journal;
   try {
     const result= await getJournalService(userID, journalID);
-    if (result.message) {
+    if (result.code) {
       return next(result)
     } else {
       journal = result;
