@@ -1,6 +1,7 @@
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const signup = async (req, res, next) => {
   const {
@@ -80,7 +81,32 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
-  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+  let token;
+  try {
+    token = jwt.sign(
+      {
+        userId: createdUser.id,
+        email: createdUser.email,
+        firstName: createdUser.firstName,
+      },
+      "very_secret_do_not_share_me_sad_face",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed! Please try again later!",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(201).json({
+    userId: createdUser.id,
+    email: createdUser.email,
+    journals: createdUser.journals,
+    firstName: createdUser.firstName,
+    token,
+  });
 };
 
 const login = async (req, res, next) => {
@@ -119,7 +145,32 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ message: "Logged in!" });
+  let token;
+  try {
+    token = jwt.sign(
+      {
+        userId: existingUser.id,
+        email: existingUser.email,
+        firstName: existingUser.firstName,
+      },
+      "very_secret_do_not_share_me_sad_face",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed! Please try again later!",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(201).json({
+    userId: existingUser.id,
+    email: existingUser.email,
+    journals: existingUser.journals,
+    firstName: existingUser.firstName,
+    token,
+  });
 };
 
 exports.usersControllers = {
