@@ -4,7 +4,7 @@ const Journal = require("../models/journal");
 const User = require("../models/user");
 const { getJournalService } = require("./helpers");
 
-const userID = "6159cd72b1d83b59a675123f";
+const userID = "615ec626bcee512284118f4f";
 
 const getAllJournals = async (req, res, next) => {
   //for displaying list of journals with names/description so populate needed
@@ -36,9 +36,9 @@ const getJournal = async (req, res, next) => {
   const journalID = req.params.journalID;
   let journal;
   try {
-    const result= await getJournalService(userID, journalID);
+    const result = await getJournalService(userID, journalID);
     if (result.code) {
-      return next(result)
+      return next(result);
     } else {
       journal = result;
     }
@@ -177,9 +177,59 @@ const deleteJournal = async (req, res, next) => {
   res.json({ message: "Successfully deleted" });
 };
 
+const updateJournal = async (req, res, next) => {
+  const journalID = req.params.journalID;
+  let journal;
+
+  try {
+    const result = await getJournalService(userID, journalID);
+    if (result.code) {
+      return next(result);
+    } else {
+      journal = result;
+    }
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, please try again later!",
+      500
+    );
+    return next(error);
+  }
+
+  const { journalName, description } = req.body;
+  if (!journalName) {
+    const error = new HttpError("The journal needs a name!", 400);
+    return next(error);
+  }
+
+  if (
+    journal.journalName === journalName &&
+    journal.description === description
+  ) {
+    const error = new HttpError(
+      "Couldn't update, the title and description are the same!"
+    );
+    return next(error);
+  }
+  journal.journalName = journalName;
+  journal.description = description;
+
+  try {
+    await journal.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, couldn't update the journal!",
+      500
+    );
+    return next(error);
+  }
+  res.status(200).json(journal);
+};
+
 exports.journalControllers = {
   getAllJournals,
   getJournal,
   createJournal,
   deleteJournal,
+  updateJournal,
 };
