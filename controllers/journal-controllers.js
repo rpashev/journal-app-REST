@@ -36,7 +36,12 @@ const getJournal = async (req, res, next) => {
   const journalID = req.params.journalID;
   let journal;
   try {
-    journal = await getJournalService(userID, journalID, next);
+    const result= await getJournalService(userID, journalID);
+    if (result.message) {
+      return next(result)
+    } else {
+      journal = result;
+    }
   } catch (err) {
     const error = new HttpError(
       "Something went wrong, please try again later!",

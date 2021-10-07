@@ -2,13 +2,13 @@ const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const Journal = require("../models/journal");
 
-const getJournalService = async (userID, journalID, callback) => {
+const getJournalService = async (userID, journalID) => {
   if (
     !mongoose.Types.ObjectId.isValid(userID) ||
     !mongoose.Types.ObjectId.isValid(journalID)
   ) {
     const error = new HttpError("Invalid credentials or journal ID!", 400);
-    return callback(error);
+    return error;
   }
 
   let data;
@@ -21,7 +21,7 @@ const getJournalService = async (userID, journalID, callback) => {
         "Could not find a journal for the provided ID",
         404
       );
-      return callback(error);
+      return error;
     }
   } catch (err) {
     const error = new HttpError(
@@ -29,7 +29,7 @@ const getJournalService = async (userID, journalID, callback) => {
       500
     );
 
-    return callback(error);
+    return error;
   }
   return data[0];
 };

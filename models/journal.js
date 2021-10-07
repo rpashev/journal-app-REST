@@ -8,7 +8,6 @@ const journalSchema = new Schema({
   creator: { type: mongoose.Types.ObjectId, required: true, ref: "User" },
   entries: [
     {
-      id: { type: mongoose.Types.ObjectId, required: true },
       title: String,
       body: { type: String, required: true },
       date: { type: Date, default: new Date() },
