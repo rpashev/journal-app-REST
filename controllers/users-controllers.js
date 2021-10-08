@@ -140,7 +140,8 @@ const login = async (req, res, next) => {
 
   if (!isValidPassword) {
     const error = new HttpError(
-      "Could not log you in, please check credentials and try again!!"
+      "Could not log you in, please check credentials and try again!!",
+      401
     );
     return next(error);
   }
