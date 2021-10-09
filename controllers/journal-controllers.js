@@ -4,18 +4,18 @@ const Journal = require("../models/journal");
 const User = require("../models/user");
 const { getJournalService } = require("./helpers");
 
-const userID = "615ec626bcee512284118f4f";
-
 const getAllJournals = async (req, res, next) => {
   //for displaying list of journals with names/description so populate needed
-  if (!mongoose.Types.ObjectId.isValid(userID)) {
+  const userId = req.userData.userId;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
     const error = new HttpError("Invalid credentials!", 400);
     return next(error);
   }
 
   let journals;
   try {
-    journals = await Journal.find({ creator: userID }, "-entries");
+    journals = await Journal.find({ creator: userId }, "-entries");
     if (journals.length === 0) {
       const error = new HttpError("No existing journals for this user!", 404);
       return next(error);
@@ -32,11 +32,12 @@ const getAllJournals = async (req, res, next) => {
 
 const getJournal = async (req, res, next) => {
   //for displaying all the entries, needs to check the creator of the journal
+  const userId = req.userData.userId;
 
   const journalID = req.params.journalID;
   let journal;
   try {
-    const result = await getJournalService(userID, journalID);
+    const result = await getJournalService(userId, journalID);
     if (result.code) {
       return next(result);
     } else {
@@ -53,7 +54,10 @@ const getJournal = async (req, res, next) => {
 };
 
 const createJournal = async (req, res, next) => {
+  console.log(req);
   const { journalName, description } = req.body;
+  const userId = req.userData.userId;
+
   if (!journalName) {
     const error = new HttpError(
       "Could not craete a journal as journal name is required!",
@@ -62,7 +66,7 @@ const createJournal = async (req, res, next) => {
     return next(error);
   }
 
-  if (!mongoose.Types.ObjectId.isValid(userID)) {
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
     const error = new HttpError(
       "Invalid credentials, could not create journal!",
       400
@@ -73,13 +77,13 @@ const createJournal = async (req, res, next) => {
   const createdJournal = new Journal({
     journalName,
     description,
-    creator: userID,
+    creator: userId,
     entries: [],
   });
 
   let user;
   try {
-    user = await User.findById(userID).populate("journals");
+    user = await User.findById(userId).populate("journals");
   } catch (err) {
     const error = new HttpError(
       "Something went wrong! Please try again later.",
@@ -125,10 +129,12 @@ const createJournal = async (req, res, next) => {
 
 const deleteJournal = async (req, res, next) => {
   //needs to delete from journals + user
+  const userId = req.userData.userId;
+
   const journalID = req.params.journalID;
 
   if (
-    !mongoose.Types.ObjectId.isValid(userID) ||
+    !mongoose.Types.ObjectId.isValid(userId) ||
     !mongoose.Types.ObjectId.isValid(journalID)
   ) {
     const error = new HttpError(
@@ -142,7 +148,7 @@ const deleteJournal = async (req, res, next) => {
   try {
     journal = await Journal.findById(journalID).populate("creator");
 
-    if (journal.creator.id !== userID) {
+    if (journal.creator.id !== userId) {
       const error = new HttpError("Access denied!", 400);
       return next(error);
     }
@@ -178,11 +184,13 @@ const deleteJournal = async (req, res, next) => {
 };
 
 const updateJournal = async (req, res, next) => {
+  const userId = req.userData.userId;
+
   const journalID = req.params.journalID;
   let journal;
 
   try {
-    const result = await getJournalService(userID, journalID);
+    const result = await getJournalService(userId, journalID);
     if (result.code) {
       return next(result);
     } else {
