@@ -148,6 +148,7 @@ const login = async (req, res, next) => {
 
   let token;
   try {
+    // console.log(existingUser.id)
     token = jwt.sign(
       {
         userId: existingUser.id,

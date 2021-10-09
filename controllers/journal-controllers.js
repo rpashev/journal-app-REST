@@ -18,7 +18,7 @@ const getAllJournals = async (req, res, next) => {
     journals = await Journal.find({ creator: userId }, "-entries");
     if (journals.length === 0) {
       const error = new HttpError("No existing journals for this user!", 404);
-      return next(error);
+      return next(error);S
     }
   } catch (err) {
     const error = new HttpError(
@@ -27,6 +27,7 @@ const getAllJournals = async (req, res, next) => {
     );
     return next(error);
   }
+
   res.json(journals);
 };
 
@@ -54,7 +55,6 @@ const getJournal = async (req, res, next) => {
 };
 
 const createJournal = async (req, res, next) => {
-  console.log(req);
   const { journalName, description } = req.body;
   const userId = req.userData.userId;
 
