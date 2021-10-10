@@ -3,6 +3,7 @@ const HttpError = require("../models/http-error");
 const Journal = require("../models/journal");
 
 const getJournalService = async (userID, journalID) => {
+  // console.log(userID, journalID)
   if (
     !mongoose.Types.ObjectId.isValid(userID) ||
     !mongoose.Types.ObjectId.isValid(journalID)

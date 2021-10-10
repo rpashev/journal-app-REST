@@ -4,13 +4,14 @@ const Journal = require("../models/journal");
 
 const { getJournalService } = require("./helpers");
 
-const userID = "6159cd72b1d83b59a675123f";
-
 const createEntry = async (req, res, next) => {
   const journalID = req.params.journalID;
+  const userID = req.userData.userId;
+
   let journal;
 
   try {
+    // console.log(journalID + "ha")
     const result = await getJournalService(userID, journalID);
     if (result.code) {
       return next(result);
@@ -25,8 +26,8 @@ const createEntry = async (req, res, next) => {
     return next(error);
   }
 
-  let { title, body } = req.body;
-  const date = new Date();
+  let { title, body, date } = req.body;
+  date = date ? date : new Date();
   title = title ? title : date.toLocaleDateString("en-GB");
 
   if (!body) {
@@ -50,6 +51,8 @@ const createEntry = async (req, res, next) => {
 
 const updateEntry = async (req, res, next) => {
   const { journalID, entryID } = req.params;
+  const userID = req.userData.userId;
+
   if (!mongoose.Types.ObjectId.isValid(entryID)) {
     const error = new HttpError("Invalid entry id!");
     return next(error);
@@ -113,6 +116,7 @@ const updateEntry = async (req, res, next) => {
 
 const deleteEntry = async (req, res, next) => {
   const { journalID, entryID } = req.params;
+  const userID = req.userData.userId;
 
   if (!mongoose.Types.ObjectId.isValid(entryID)) {
     const error = new HttpError("Invalid entry id!");

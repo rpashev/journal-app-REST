@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
       token,
       "very_secret_do_not_share_me_sad_face"
     );
-console.log(token)
+// console.log(token)
     req.userData = { userId: decodedToken.userId };
     next();
   } catch (err) {
