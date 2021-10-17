@@ -28,7 +28,7 @@ const createEntry = async (req, res, next) => {
 
   let { title, body, date } = req.body;
   date = date ? date : new Date();
-  title = title ? title : date.toLocaleDateString("en-GB");
+  title = title ? title : date;
 
   if (!body) {
     const error = new HttpError("The entry cannot be empty!", 400);
@@ -165,7 +165,7 @@ const deleteEntry = async (req, res, next) => {
 const getEntry = async (req, res, next) => {
   const { journalID, entryID } = req.params;
   const userID = req.userData.userId;
-  console.log(userID, journalID, entryID)
+  console.log(userID, journalID, entryID);
 
   if (!mongoose.Types.ObjectId.isValid(entryID)) {
     const error = new HttpError("Invalid entry id!");

@@ -18,7 +18,8 @@ const getAllJournals = async (req, res, next) => {
     journals = await Journal.find({ creator: userId }, "-entries");
     if (journals.length === 0) {
       const error = new HttpError("No existing journals for this user!", 404);
-      return next(error);S
+      return next(error);
+      S;
     }
   } catch (err) {
     const error = new HttpError(
@@ -188,6 +189,7 @@ const updateJournal = async (req, res, next) => {
 
   const journalID = req.params.journalID;
   let journal;
+  let user;
 
   try {
     const result = await getJournalService(userId, journalID);
@@ -205,6 +207,33 @@ const updateJournal = async (req, res, next) => {
   }
 
   const { journalName, description } = req.body;
+  try {
+    user = await User.findById(userId).populate("journals");
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong! Please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError("No such user!", 404);
+    return next(error);
+  }
+
+  if (user.journals.length > 0) {
+    const journal = user.journals.find(
+      (journal) => journal.journalName === journalName
+    );
+    if (journal) {
+      const error = new HttpError(
+        "A journal with this name already exists!",
+        400
+      );
+      return next(error);
+    }
+  }
   if (!journalName) {
     const error = new HttpError("The journal needs a name!", 400);
     return next(error);
