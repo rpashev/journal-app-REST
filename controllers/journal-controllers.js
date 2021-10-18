@@ -228,7 +228,7 @@ const updateJournal = async (req, res, next) => {
     const journal = user.journals.find(
       (journal) => journal.journalName.trim() === journalName
     );
-    if (journal) {
+    if (journal && journal.id !== journalID) {
       const error = new HttpError(
         "A journal with this name already exists!",
         400
