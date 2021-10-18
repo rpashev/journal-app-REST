@@ -56,7 +56,8 @@ const getJournal = async (req, res, next) => {
 };
 
 const createJournal = async (req, res, next) => {
-  const { journalName, description } = req.body;
+  const journalName = req.body.journalName.trim();
+  const { description } = req.body;
   const userId = req.userData.userId;
 
   if (!journalName) {
@@ -100,7 +101,7 @@ const createJournal = async (req, res, next) => {
 
   if (user.journals.length > 0) {
     const journal = user.journals.find(
-      (journal) => journal.journalName === journalName
+      (journal) => journal.journalName.trim() === journalName
     );
     if (journal) {
       const error = new HttpError(
@@ -206,7 +207,8 @@ const updateJournal = async (req, res, next) => {
     return next(error);
   }
 
-  const { journalName, description } = req.body;
+  const { description } = req.body;
+  const journalName = req.body.journalName.trim();
   try {
     user = await User.findById(userId).populate("journals");
   } catch (err) {
@@ -224,7 +226,7 @@ const updateJournal = async (req, res, next) => {
 
   if (user.journals.length > 0) {
     const journal = user.journals.find(
-      (journal) => journal.journalName === journalName
+      (journal) => journal.journalName.trim() === journalName
     );
     if (journal) {
       const error = new HttpError(
@@ -240,7 +242,7 @@ const updateJournal = async (req, res, next) => {
   }
 
   if (
-    journal.journalName === journalName &&
+    journal.journalName.trim() === journalName &&
     journal.description === description
   ) {
     const error = new HttpError(
