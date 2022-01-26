@@ -45,7 +45,7 @@ const signup = async (req, res, next) => {
   }
   if (existingUser) {
     const error = new HttpError(
-      "User with such email exists already! Please login instead",
+      "User with such email exists already! Please login instead.",
       422
     );
     return next(error);

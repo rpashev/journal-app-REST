@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
     
     if (!token) {
       // console.log(req.headers.authorization)
-      throw new Error("Authentication failed! Access denied!", 401);
+      throw new HttpError("Authentication failed! Access denied!", 401);
     }
     const decodedToken = jwt.verify(
       token,
@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
     req.userData = { userId: decodedToken.userId };
     next();
   } catch (err) {
-    const error = new Error("Authentication failed! Access denied!", 401);
+    const error = new HttpError("Authentication failed! Access denied!", 401);
     return next(error);
   }
 };

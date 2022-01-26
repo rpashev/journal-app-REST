@@ -15,11 +15,9 @@ const getAllJournals = async (req, res, next) => {
 
   let journals;
   try {
-    journals = await Journal.find({ creator: userId }, "-entries");
+    journals = await Journal.find({ creator: userId });
     if (journals.length === 0) {
-      const error = new HttpError("No existing journals for this user!", 404);
-      return next(error);
-      S;
+      return res.json([]);
     }
   } catch (err) {
     const error = new HttpError(
@@ -28,6 +26,14 @@ const getAllJournals = async (req, res, next) => {
     );
     return next(error);
   }
+
+  journals = journals.map((journal) => {
+    return {
+      id: journal._id,
+      journalName: journal.journalName,
+      entriesAmount: journal.entries.length,
+    };
+  });
 
   res.json(journals);
 };
