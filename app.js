@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-// const history = require("connect-history-api-fallback");
 const entryRoutes = require("./routes/entry-routes");
 const authRoutes = require("./routes/auth-routes");
 const journalRoutes = require("./routes/journal-routes");
