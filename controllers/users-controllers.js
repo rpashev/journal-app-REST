@@ -89,8 +89,8 @@ const signup = async (req, res, next) => {
         email: createdUser.email,
         firstName: createdUser.firstName,
       },
-      "very_secret_do_not_share_me_sad_face",
-      { expiresIn: "1h" }
+      process.env.JWT_SECRET
+      // { expiresIn: "1h" }
     );
   } catch (err) {
     const error = new HttpError(
@@ -155,8 +155,8 @@ const login = async (req, res, next) => {
         email: existingUser.email,
         firstName: existingUser.firstName,
       },
-      "very_secret_do_not_share_me_sad_face",
-      { expiresIn: "1h" }
+      process.env.JWT_SECRET
+      // { expiresIn: "1h" }
     );
   } catch (err) {
     const error = new HttpError(
