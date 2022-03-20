@@ -271,7 +271,7 @@ const updateJournal = async (req, res, next) => {
   res.status(200).json(journal);
 };
 
-exports.journalControllers = {
+module.exports = {
   getAllJournals,
   getJournal,
   createJournal,

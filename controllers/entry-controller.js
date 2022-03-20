@@ -117,9 +117,8 @@ const updateEntry = async (req, res, next) => {
 const deleteEntry = async (req, res, next) => {
   const { journalID, entryID } = req.params;
   const userID = req.userData.userId;
-console.log(journalID, entryID)
+  console.log(journalID, entryID);
   if (!mongoose.Types.ObjectId.isValid(entryID)) {
-    
     const error = new HttpError("Invalid entry id!");
     return next(error);
   }
@@ -166,7 +165,6 @@ console.log(journalID, entryID)
 const getEntry = async (req, res, next) => {
   const { journalID, entryID } = req.params;
   const userID = req.userData.userId;
- 
 
   if (!mongoose.Types.ObjectId.isValid(entryID)) {
     const error = new HttpError("Invalid entry id!");
@@ -201,7 +199,7 @@ const getEntry = async (req, res, next) => {
   res.json(entry);
 };
 
-exports.entryControllers = {
+module.exports = {
   createEntry,
   updateEntry,
   deleteEntry,

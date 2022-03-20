@@ -1,7 +1,8 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+
 const entryRoutes = require("./routes/entry-routes");
 const authRoutes = require("./routes/auth-routes");
 const journalRoutes = require("./routes/journal-routes");
@@ -14,12 +15,9 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// app.use(history());
-
 app.use(
   cors({
     credentials: true,
-    // origin: 'http://localhost:8080'
     origin: true,
   })
 );

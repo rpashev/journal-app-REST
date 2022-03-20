@@ -1,14 +1,13 @@
 const express = require("express");
 
-const { journalControllers } = require("../controllers/journal-controllers");
-const checkAuth = require("../middleware/check-auth");
+const journalController = require("../controllers/journal-controller");
 
 const router = express.Router();
 
-router.get("/", journalControllers.getAllJournals);
-router.get("/:journalID", journalControllers.getJournal);
-router.delete("/:journalID", journalControllers.deleteJournal);
-router.patch("/:journalID", journalControllers.updateJournal);
-router.post("/create-journal", journalControllers.createJournal);
+router.get("/", journalController.getAllJournals);
+router.get("/:journalID", journalController.getJournal);
+router.delete("/:journalID", journalController.deleteJournal);
+router.patch("/:journalID", journalController.updateJournal);
+router.post("/create-journal", journalController.createJournal);
 
 module.exports = router;

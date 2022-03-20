@@ -175,7 +175,7 @@ const login = async (req, res, next) => {
   });
 };
 
-exports.usersControllers = {
+module.exports = {
   signup,
   login,
 };

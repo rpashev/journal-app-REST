@@ -1,13 +1,12 @@
 const express = require("express");
 
-const { entryControllers } = require("../controllers/entry-controllers");
-const checkAuth = require("../middleware/check-auth");
+const entryController = require("../controllers/entry-controller");
 
 const router = express.Router();
 
-router.get("/journals/:journalID/:entryID", entryControllers.getEntry);
-router.post("/journals/:journalID/create-entry", entryControllers.createEntry);
-router.patch("/journals/:journalID/:entryID", entryControllers.updateEntry);
-router.delete("/journals/:journalID/:entryID", entryControllers.deleteEntry);
+router.get("/journals/:journalID/:entryID", entryController.getEntry);
+router.post("/journals/:journalID/create-entry", entryController.createEntry);
+router.patch("/journals/:journalID/:entryID", entryController.updateEntry);
+router.delete("/journals/:journalID/:entryID", entryController.deleteEntry);
 
 module.exports = router;
