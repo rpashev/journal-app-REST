@@ -36,8 +36,9 @@ app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
   }
+  console.log("here");
   res.status(error.code || 500);
-  res.json({ message: error.message || "Uknown error occurred!" });
+  res.json({ message: error.message || "Something went wrong!" });
 });
 
 module.exports = app;

@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
-const Journal = require("../models/journal");
 
-const { getJournalService } = require("./helpers");
+const { getJournalService } = require("../utils/helpers");
 
 const createEntry = async (req, res, next) => {
   const journalID = req.params.journalID;
@@ -10,20 +9,12 @@ const createEntry = async (req, res, next) => {
 
   let journal;
 
-  try {
-    // console.log(journalID + "ha")
-    const result = await getJournalService(userID, journalID);
-    if (result.code) {
-      return next(result);
-    } else {
-      journal = result;
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+  // console.log(journalID + "ha")
+  const result = await getJournalService(userID, journalID);
+  if (result.code) {
+    return next(result);
+  } else {
+    journal = result;
   }
 
   let { title, body, date } = req.body;
@@ -37,15 +28,9 @@ const createEntry = async (req, res, next) => {
   const entry = { title, body, date };
 
   journal.entries.unshift(entry);
-  try {
-    await journal.save();
-  } catch (err) {
-    const error = new HttpError(
-      "Could not save entry, something went wrong!",
-      500
-    );
-    return next(error);
-  }
+
+  await journal.save();
+
   res.json(journal);
 };
 
@@ -60,19 +45,11 @@ const updateEntry = async (req, res, next) => {
 
   let journal;
 
-  try {
-    const result = await getJournalService(userID, journalID);
-    if (result.code) {
-      return next(result);
-    } else {
-      journal = result;
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+  const result = await getJournalService(userID, journalID);
+  if (result.code) {
+    return next(result);
+  } else {
+    journal = result;
   }
 
   const entry = journal.entries.find((entry) => entry.id === entryID);
@@ -100,15 +77,7 @@ const updateEntry = async (req, res, next) => {
   entry.title = title;
   entry.body = body;
 
-  try {
-    await journal.save();
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, couldn't update entry!",
-      500
-    );
-    return next(error);
-  }
+  await journal.save();
 
   res.status = 200;
   res.json(journal);
@@ -125,19 +94,11 @@ const deleteEntry = async (req, res, next) => {
 
   let journal;
 
-  try {
-    const result = await getJournalService(userID, journalID);
-    if (result.code) {
-      return next(result);
-    } else {
-      journal = result;
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+  const result = await getJournalService(userID, journalID);
+  if (result.code) {
+    return next(result);
+  } else {
+    journal = result;
   }
 
   const entryIndex = journal.entries.findIndex((entry) => entry.id === entryID);
@@ -149,19 +110,13 @@ const deleteEntry = async (req, res, next) => {
     return next(error);
   }
   journal.entries.splice(entryIndex, 1);
-  try {
-    await journal.save();
-  } catch (err) {
-    const error = new HttpError(
-      "SOmething went wrong, could not delete entry!",
-      500
-    );
-    return next(error);
-  }
+
+  await journal.save();
 
   res.status = 200;
   res.json(journal.entries);
 };
+
 const getEntry = async (req, res, next) => {
   const { journalID, entryID } = req.params;
   const userID = req.userData.userId;
@@ -173,20 +128,13 @@ const getEntry = async (req, res, next) => {
 
   let journal;
 
-  try {
-    const result = await getJournalService(userID, journalID);
-    if (result.code) {
-      return next(result);
-    } else {
-      journal = result;
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+  const result = await getJournalService(userID, journalID);
+  if (result.code) {
+    return next(result);
+  } else {
+    journal = result;
   }
+
   const entry = journal.entries.find((entry) => entry.id === entryID);
   if (!entry) {
     const error = new HttpError(

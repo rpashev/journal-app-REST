@@ -2,10 +2,9 @@ const mongoose = require("mongoose");
 const HttpError = require("../models/http-error");
 const Journal = require("../models/journal");
 const User = require("../models/user");
-const { getJournalService } = require("./helpers");
+const { getJournalService } = require("../utils/helpers");
 
 const getAllJournals = async (req, res, next) => {
-  //for displaying list of journals with names/description so populate needed
   const userId = req.userData.userId;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -14,17 +13,10 @@ const getAllJournals = async (req, res, next) => {
   }
 
   let journals;
-  try {
-    journals = await Journal.find({ creator: userId });
-    if (journals.length === 0) {
-      return res.json([]);
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+
+  journals = await Journal.find({ creator: userId });
+  if (journals.length === 0) {
+    return res.json([]);
   }
 
   journals = journals.map((journal) => {
@@ -44,20 +36,14 @@ const getJournal = async (req, res, next) => {
 
   const journalID = req.params.journalID;
   let journal;
-  try {
-    const result = await getJournalService(userId, journalID);
-    if (result.code) {
-      return next(result);
-    } else {
-      journal = result;
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+
+  const result = await getJournalService(userId, journalID);
+  if (result.code) {
+    return next(result);
+  } else {
+    journal = result;
   }
+
   res.json(journal);
 };
 
@@ -90,15 +76,8 @@ const createJournal = async (req, res, next) => {
   });
 
   let user;
-  try {
-    user = await User.findById(userId).populate("journals");
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong! Please try again later.",
-      500
-    );
-    return next(error);
-  }
+
+  user = await User.findById(userId).populate("journals");
 
   if (!user) {
     const error = new HttpError("No such user!", 404);
@@ -153,18 +132,11 @@ const deleteJournal = async (req, res, next) => {
   }
 
   let journal;
-  try {
-    journal = await Journal.findById(journalID).populate("creator");
 
-    if (journal.creator.id !== userId) {
-      const error = new HttpError("Access denied!", 400);
-      return next(error);
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, could not delete journal. ",
-      500
-    );
+  journal = await Journal.findById(journalID).populate("creator");
+
+  if (journal.creator.id !== userId) {
+    const error = new HttpError("Access denied!", 400);
     return next(error);
   }
 
@@ -198,32 +170,17 @@ const updateJournal = async (req, res, next) => {
   let journal;
   let user;
 
-  try {
-    const result = await getJournalService(userId, journalID);
-    if (result.code) {
-      return next(result);
-    } else {
-      journal = result;
-    }
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, please try again later!",
-      500
-    );
-    return next(error);
+  const result = await getJournalService(userId, journalID);
+  if (result.code) {
+    return next(result);
+  } else {
+    journal = result;
   }
 
   const { description } = req.body;
   const journalName = req.body.journalName.trim();
-  try {
-    user = await User.findById(userId).populate("journals");
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong! Please try again later.",
-      500
-    );
-    return next(error);
-  }
+
+  user = await User.findById(userId).populate("journals");
 
   if (!user) {
     const error = new HttpError("No such user!", 404);
@@ -259,15 +216,8 @@ const updateJournal = async (req, res, next) => {
   journal.journalName = journalName;
   journal.description = description;
 
-  try {
-    await journal.save();
-  } catch (err) {
-    const error = new HttpError(
-      "Something went wrong, couldn't update the journal!",
-      500
-    );
-    return next(error);
-  }
+  await journal.save();
+
   res.status(200).json(journal);
 };
 

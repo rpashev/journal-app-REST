@@ -34,15 +34,9 @@ const signup = async (req, res, next) => {
   }
 
   let existingUser;
-  try {
-    existingUser = await User.findOne({ email: email });
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed! Please try again later.",
-      500
-    );
-    return next(error);
-  }
+
+  existingUser = await User.findOne({ email: email });
+
   if (existingUser) {
     const error = new HttpError(
       "User with such email exists already! Please login instead.",
@@ -52,15 +46,8 @@ const signup = async (req, res, next) => {
   }
 
   let hashedPassword;
-  try {
-    hashedPassword = await bcrypt.hash(password, 12);
-  } catch (err) {
-    const error = new HttpError(
-      "Could not create user! Please try again later!",
-      500
-    );
-    return next(error);
-  }
+
+  hashedPassword = await bcrypt.hash(password, 12);
 
   const createdUser = new User({
     firstName,
@@ -72,33 +59,19 @@ const signup = async (req, res, next) => {
     journals: [],
   });
 
-  try {
-    await createdUser.save();
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed! Please try again later!",
-      500
-    );
-    return next(error);
-  }
+  await createdUser.save();
+
   let token;
-  try {
-    token = jwt.sign(
-      {
-        userId: createdUser.id,
-        email: createdUser.email,
-        firstName: createdUser.firstName,
-      },
-      process.env.JWT_SECRET
-      // { expiresIn: "1h" }
-    );
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed! Please try again later!",
-      500
-    );
-    return next(error);
-  }
+
+  token = jwt.sign(
+    {
+      userId: createdUser.id,
+      email: createdUser.email,
+      firstName: createdUser.firstName,
+    },
+    process.env.JWT_SECRET
+    // { expiresIn: "1h" }
+  );
 
   res.status(201).json({
     userId: createdUser.id,
@@ -113,15 +86,9 @@ const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   let existingUser;
-  try {
-    existingUser = await User.findOne({ email: email });
-  } catch (err) {
-    const error = new HttpError(
-      "Signing in failed! Please try again later.",
-      500
-    );
-    return next(error);
-  }
+
+  existingUser = await User.findOne({ email: email });
+
   if (!existingUser) {
     const error = new HttpError("Invalid credentials! Could not log in!", 401);
     return next(error);
@@ -147,24 +114,17 @@ const login = async (req, res, next) => {
   }
 
   let token;
-  try {
-    // console.log(existingUser.id)
-    token = jwt.sign(
-      {
-        userId: existingUser.id,
-        email: existingUser.email,
-        firstName: existingUser.firstName,
-      },
-      process.env.JWT_SECRET
-      // { expiresIn: "1h" }
-    );
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed! Please try again later!",
-      500
-    );
-    return next(error);
-  }
+
+  // console.log(existingUser.id)
+  token = jwt.sign(
+    {
+      userId: existingUser.id,
+      email: existingUser.email,
+      firstName: existingUser.firstName,
+    },
+    process.env.JWT_SECRET
+    // { expiresIn: "1h" }
+  );
 
   res.status(201).json({
     userId: existingUser.id,
