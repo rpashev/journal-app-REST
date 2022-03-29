@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 
 const entryRoutes = require("./routes/entry-routes");
 const authRoutes = require("./routes/auth-routes");
@@ -9,6 +10,8 @@ const HttpError = require("./models/http-error");
 const checkAuth = require("./middleware/check-auth");
 
 const app = express();
+
+app.use(helmet());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
