@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const hpp = require("hpp");
 
 const entryRoutes = require("./routes/entry-routes");
 const authRoutes = require("./routes/auth-routes");
@@ -15,6 +18,16 @@ app.use(helmet());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10kb" }));
+
+app.use(mongoSanitize());
+
+app.use(hpp());
+
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 100,
+});
+app.use(limiter);
 
 app.use(
   cors({
