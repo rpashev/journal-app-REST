@@ -52,9 +52,9 @@ const createJournal = async (req, res, next) => {
   const { description } = req.body;
   const userId = req.userData.userId;
 
-  if (!journalName) {
+  if (!journalName || journalName.length > 40) {
     const error = new HttpError(
-      "Could not craete a journal as journal name is required!",
+      "Could not craete a journal as journal name is required and must be at most 40 characters!",
       400
     );
     return next(error);
@@ -199,8 +199,11 @@ const updateJournal = async (req, res, next) => {
       return next(error);
     }
   }
-  if (!journalName) {
-    const error = new HttpError("The journal needs a name!", 400);
+  if (!journalName || journalName.length > 40) {
+    const error = new HttpError(
+      "The journal needs a name and it must be at most 40 characters!",
+      400
+    );
     return next(error);
   }
 
