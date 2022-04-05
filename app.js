@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
+const compression = require("compression");
 
 const entryRoutes = require("./routes/entry-routes");
 const authRoutes = require("./routes/auth-routes");
@@ -29,6 +30,8 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+app.use(compression());
+
 app.use(
   cors({
     credentials: true,
@@ -52,7 +55,7 @@ app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
   }
-  console.log("here");
+  // console.log("here");
   res.status(error.code || 500);
   res.json({ message: error.message || "Something went wrong!" });
 });
