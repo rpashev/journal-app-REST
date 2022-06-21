@@ -4,8 +4,8 @@ Node/Express/Mongo REST API for my [Vue journal app](https://github.com/rpashev/
 
 ## Endpoints
 
-- /signup &emsp; `POST`
-- /login &emsp; `POST`
+- /auth/signup &emsp; `POST`
+- /auth/login &emsp; `POST`
 - /journals &emsp; `GET`
 - /journals/:journalID &emsp; `GET` | `PATCH` | `DELETE`
 - /journals/create-journal &emsp; `POST`
