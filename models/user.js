@@ -13,6 +13,7 @@ const userSchema = new Schema({
   termsAgreement: { type: Boolean, default: false },
   updatesAgreement: { type: Boolean, default: false },
   journals: [{ type: mongoose.Types.ObjectId, ref: "Journal" }],
+  trackedLocations: [{ type: mongoose.Types.ObjectId, ref: "Location" }],
 });
 
 module.exports = mongoose.model("User", userSchema);
