@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 mongoose
   .connect(process.env.DB_CONNECTION)
   .then(() => {
-    app.listen(process.env.PORT || 5000, () =>
+    app.listen(process.env.PORT || 3000, () =>
       console.log(`listening on port ${port}...`)
     );
   })
