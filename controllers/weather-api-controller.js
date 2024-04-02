@@ -21,7 +21,7 @@ const getAllLocations = async (req, res, next) => {
   let locations;
 
   if (user.trackedLocations?.length === 0) {
-    return res.json([]);
+    return res.json({ locations: [] });
   }
 
   locations = user.trackedLocations.map((location) => {
@@ -31,6 +31,7 @@ const getAllLocations = async (req, res, next) => {
       lon: location.lon,
       city: location.city,
       country: location.country,
+      creator: location.creator,
     };
   });
 
@@ -42,7 +43,7 @@ const addLocation = async (req, res, next) => {
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     const error = new HttpError(
-      "Invalid credentials, could not create journal!",
+      "Invalid credentials, could not add location!",
       400
     );
     return next(error);
@@ -140,7 +141,7 @@ const deleteLocation = async (req, res, next) => {
     await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(
-      "Something went wrong, could not delete journal.",
+      "Something went wrong, could not delete location!",
       500
     );
     return next(error);
@@ -149,8 +150,81 @@ const deleteLocation = async (req, res, next) => {
   res.json(null);
 };
 
+const replaceLocations = async (req, res, next) => {
+  const userId = req.userData.userId;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    const error = new HttpError(
+      "Invalid credentials, could not save locations!",
+      400
+    );
+    return next(error);
+  }
+
+  let user;
+
+  user = await User.findById(userId).populate("trackedLocations");
+
+  if (!user) {
+    const error = new HttpError("No such user!", 404);
+    return next(error);
+  }
+
+  let { locations } = req.body;
+
+  if (!Array.isArray(locations)) {
+    const error = new HttpError("Invalid data!", 400);
+    return next(error);
+  }
+
+  if (locations.some((id) => !mongoose.Types.ObjectId.isValid(id))) {
+    const error = new HttpError("Invalid data!", 400);
+    return next(error);
+  }
+
+  locations = locations.map((id) => mongoose.Types.ObjectId(id));
+
+  if (
+    locations.some((locId) => {
+      const hasMatch = user.trackedLocations.find((dbLoc) => {
+        return (
+          locId.equals(dbLoc._id) &&
+          mongoose.Types.ObjectId(userId).equals(dbLoc.creator)
+        );
+      });
+      return !hasMatch;
+    })
+  ) {
+    const error = new HttpError("Invalid data!", 400);
+    return next(error);
+  }
+
+  user.trackedLocations = locations;
+
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await user.save({ session: sess });
+    await Location.deleteMany({
+      _id: { $nin: locations },
+      creator: userId,
+    }).session(sess);
+
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not save locatins!",
+      500
+    );
+    return next(error);
+  }
+
+  res.json({ message: "Successfully saved locations" });
+};
+
 module.exports = {
   getAllLocations,
   addLocation,
   deleteLocation,
+  replaceLocations,
 };
